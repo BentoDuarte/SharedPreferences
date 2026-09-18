@@ -1,38 +1,36 @@
 package com.example.sharedpreferences.database;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.content.SharedPreferences;
 
 import com.example.sharedpreferences.model.Produto;
 
 public class ProdutoDAO {
-    private SQLiteDatabase db;
-    private Database con;
+
+    private SharedPreferences preferences;
+
     public ProdutoDAO(Context context) {
-        con = new Database(context);
+        Database con = new Database(context);
+        preferences = con.getPreferences();
     }
+
     // INSERT
     public boolean inserir(Produto produto) {
-        db = con.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(
-                "nome", produto.getNome());
-        values.put("" +
-                "descricao", produto.getDescricao());
-        values.put("" +
-                "preco", produto.getPreco());
-        long resultado = db.insert(Database.TABELA_PRODUTO, null, values);
-        return resultado != -1;
+
+        SharedPreferences.Editor editor = preferences.edit();
+
+        editor.putString("NOME", produto.getNome());
+        editor.putString("DESCRICAO", produto.getDescricao());
+        editor.putString("PRECO", produto.getPreco().toString());
+
+        editor.apply();
+
+        return true;
     }
-    // Busca
+
+    // BUSCA
     public boolean busca() {
-        db = con.getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-                "SELECT * FROM " +
-                        Database.TABELA_PRODUTO,
-                null);
-        boolean existe = cursor.getCount() > 0; cursor.close(); return existe;
+
+        return preferences.contains("NOME");
     }
 }
